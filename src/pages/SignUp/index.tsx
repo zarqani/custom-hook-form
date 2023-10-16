@@ -1,42 +1,49 @@
+import { FormEvent } from "react";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { useForm } from "../../hooks/useForm";
 import * as yup from "yup";
 
+type FormFields = {
+  fullName: string;
+  email: string;
+  password: string;
+};
+
 export default function SignUp() {
-  // Initialize useForm hook with initial values and validation schema
   const {
     formState: { isSubmitting, isValid, errors },
     register,
     handleSubmit,
   } = useForm({
     initialValues: {
-      username: "",
+      fullName: "",
       email: "",
       password: "",
     },
     validationSchema: yup.object().shape({
-      fileName: yup.string().max(255).required("field is required."),
+      fullName: yup.string().max(255).required("field is required."),
       email: yup
         .string()
         .email("not a valid email")
         .max(255)
-        .required("field mandatory"),
-      // emailConfirmation: yup.string().email().max(255).required("field mandatory"),
+        .required("field is required."),
       password: yup.string().max(255).required("field is required."),
-      // passwordConfirmation: yup.string().max(255).required("field mandatory"),
     }),
   });
 
-  const onSubmit = (event) => {
-    event.preventDefault();
-    // handleSubmit(async () => {
-    //   // await postData();
-    // });
+  const onSubmit = async (values: FormFields) => {
+    console.log({ values });
+    // await postData(values);
   };
 
   return (
-    <form onSubmit={onSubmit}>
+    <form
+      onSubmit={async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        await handleSubmit(onSubmit);
+      }}
+    >
       <h3>Sign Up</h3>
       <Input
         type="text"
@@ -49,20 +56,20 @@ export default function SignUp() {
         type="email"
         name="email"
         placeholder="Email"
-        error={errors["username"]}
+        error={errors["email"]}
         {...register({ name: "email" })}
       />
       <Input
         type="password"
         name="password"
         placeholder="Password"
-        error={errors["username"]}
+        error={errors["password"]}
         {...register({ name: "password" })}
       />
       <Button
         type="submit"
         disabled={!isValid || isSubmitting}
-        loading={isSubmitting}
+        loading={!!isSubmitting}
         label="Sign Up"
       />
     </form>

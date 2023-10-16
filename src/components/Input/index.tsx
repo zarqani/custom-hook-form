@@ -1,6 +1,10 @@
 import { StyledControl, StyledFormHelper, StyledInput } from "./styled";
 
-export default function Input({ error, ...props }) {
+type InputProps = {
+  error?: string;
+};
+
+export default function Input({ error, ...props }: InputProps) {
   return (
     <StyledControl>
       <StyledInput {...props} />

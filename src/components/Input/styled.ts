@@ -21,4 +21,8 @@ export const StyledInput = styled.input`
 
 export const StyledFormHelper = styled.span`
   color: red;
+  font-size: 12px;
+  display: block;
+  margin-top: 8px;
+  text-align: left;
 `;
