@@ -4,12 +4,6 @@ import Input from "../../components/Input";
 import { useForm } from "../../hooks/useForm";
 import * as yup from "yup";
 
-type FormFields = {
-  fullName: string;
-  email: string;
-  password: string;
-};
-
 export default function SignUp() {
   const {
     formState: { isSubmitting, isValid, errors },
@@ -17,9 +11,9 @@ export default function SignUp() {
     handleSubmit,
   } = useForm({
     initialValues: {
-      fullName: "",
-      email: "",
-      password: "",
+      fullName: "test",
+      email: "test@gmail.com",
+      password: "test",
     },
     validationSchema: yup.object().shape({
       fullName: yup.string().max(255).required("field is required."),
@@ -32,7 +26,7 @@ export default function SignUp() {
     }),
   });
 
-  const onSubmit = async (values: FormFields) => {
+  const onSubmit = async (values: Record<string, any>) => {
     console.log({ values });
     // await postData(values);
   };

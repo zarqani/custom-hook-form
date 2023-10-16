@@ -1,6 +1,7 @@
+import { InputHTMLAttributes } from "react";
 import { StyledControl, StyledFormHelper, StyledInput } from "./styled";
 
-type InputProps = {
+type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   error?: string;
 };
 

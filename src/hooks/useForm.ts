@@ -1,6 +1,7 @@
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useState, useRef } from "react";
 import * as yup from "yup";
-import { cloneDeep } from "lodash";
+import cloneDeep from "lodash/cloneDeep";
+import debounce from "lodash/debounce";
 
 type ValidationSchema = yup.ObjectSchema<Record<string, any>> | null;
 
@@ -16,12 +17,17 @@ type FormState = {
   isValid: boolean;
 };
 
+type CallbackType = (values: FormFields) => Promise<void> | void;
+
 type UseFormProps = {
-  register: any;
-  getValues: any;
-  handleSubmit: any;
-  reset: any;
-  setValue: any;
+  register: ({ name }: { name: string }) => {
+    value: any;
+    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  };
+  getValues: () => FormFields;
+  handleSubmit: (callback: CallbackType) => Promise<void>;
+  reset: (params: FormFields) => void;
+  setValue: (name: string, value: any) => void;
   formState: FormState;
 };
 
@@ -37,10 +43,10 @@ export const useForm = ({
   });
 
   const validate = useCallback(
-    (values: Record<string, any>) => {
+    debounce(async (values: Record<string, any>) => {
       if (validationSchema) {
         try {
-          validationSchema.validateSync(values, { abortEarly: false });
+          await validationSchema.validateSync(values, { abortEarly: false });
           SetFormState((prev) => ({ ...prev, isValid: true, errors: {} }));
         } catch (err) {
           const errors: Record<string, string> = {};
@@ -52,19 +58,27 @@ export const useForm = ({
             SetFormState((prev) => ({ ...prev, isValid: false, errors }));
         }
       }
-    },
+    }, 200),
     [validationSchema]
+  );
+
+  const debounceOnChange = useCallback(
+    debounce(
+      (name, value) => setFieldValues((prev) => ({ ...prev, [name]: value })),
+      100
+    ),
+    []
   );
 
   const register = ({ name }: { name: string }) => {
     const onChange = (event: ChangeEvent<HTMLInputElement>) => {
       const { name, value } = event.target;
-      setFieldValues((prev) => ({ ...prev, [name]: value }));
+      debounceOnChange(name, value);
     };
     return { value: fieldValues[name], onChange };
   };
 
-  const handleSubmit = async (callback: (formFields: FormFields) => void) => {
+  const handleSubmit = async (callback: CallbackType) => {
     SetFormState((prev) => ({ ...prev, isSubmitting: true }));
     validate(fieldValues);
     if (!Object.keys(formState.errors).length)
